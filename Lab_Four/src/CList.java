@@ -169,6 +169,20 @@ public class CList<T extends Comparable<T>> extends LinkedList<T> {
     }
 
     /*
+    *   Name:       contains()
+    *   Input:      the element to be searched for
+    *   Output:     whether the element exists in the CList
+    *   Purpose:    Find out if an element exists within the CList this method was called upon.
+    */
+    public boolean contains(T x) {
+        for (node i = first; i != null; i = i.next) {
+            if (i.item.compareTo(x) == 0)
+                return true;
+        }
+        return false;
+    }
+
+    /*
     *   Name:       clone()
     *   Input:      N/A
     *   Output:     A CList with duplicate type T elements

@@ -14,7 +14,7 @@ public class mazedfs extends JFrame implements KeyListener {
     public static final int NORTH = 2;
     public static final int WEST = 3;
 
-    protected boolean showvalue = true; // affects drawblock
+    protected boolean showvalue = false; // affects drawblock
     protected boolean autodelay = false;  // delays automatically between steps
 
     // graphical properties:
@@ -70,7 +70,7 @@ public class mazedfs extends JFrame implements KeyListener {
     }
 
     public static void main(String[] args) {
-        int blocksize = bh, mheight = 41, mwidth = 41; // need to be odd
+        int blocksize = bh, mheight = 11, mwidth = 11; // need to be odd
         if (args.length == 3) {
             mheight = Integer.parseInt(args[0]);
             mwidth = Integer.parseInt(args[1]);
@@ -161,7 +161,6 @@ public class mazedfs extends JFrame implements KeyListener {
 
     public void keyTyped(KeyEvent e) {
     }
-
     public void keyPressed(KeyEvent e) // change this one
     {
         int key = e.getKeyCode();       // code for key pressed

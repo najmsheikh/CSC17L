@@ -1,3 +1,6 @@
+import java.awt.*;
+import java.awt.event.KeyEvent;
+
 class studentcode extends mazedfs {
     class Coord implements Comparable<Coord> {
         public int x, y;
@@ -31,6 +34,11 @@ class studentcode extends mazedfs {
 //    the maze solver has stepped over. Then, we will cut out the redundant paths within this list to
 //    have the optimal path from the beginning of the maze to the end.
     CList<Coord> steps;
+
+    int y = 1, x = 1;           // starting point for solver and player
+    boolean won = false;        // game win state
+    int[] GDy = {-1, 0, 1, 0};   // shift instruction of y,x pair on the y-axis
+    int[] GDx = {0, 1, 0, -1};   // shift instruction of y,x pair on the x-axis
 
     /*
     *   Name:       digout()
@@ -85,59 +93,6 @@ class studentcode extends mazedfs {
     *   Output:     N/A
     *   Purpose:    Find a way out of the maze.
     */
-//    public void solve() {
-//        int y = 1, x = 1;           // begin at the top left corner
-//        M[y][x] = 2;                // indicate that the first block has been 'stepped over'
-//        drawdot(y, x);              // draw a red dot to track progress of the solver
-//
-////        N, E, S, W
-//        int[] Dy = {-1, 0, 1, 0};   // shift instruction of y,x pair on the y-axis
-//        int[] Dx = {0, 1, 0, -1};   // shift instruction of y,x pair on the x-axis
-//
-////        The solver will keep trying to find a way out until it is a step away from the bounds.
-//        while (y != mh - 2 || x != mw - 2) {
-//            int min_y = -1;
-//            int min_x = -1;
-//
-//            int new_y, new_x;       // new y,x coordinates
-//
-////            Go through the directions.
-////            Since we are not generating a new maze, we don't have to care about choosing it
-////            randomly. As such, the solver will always look for the best path in a clockwise pass.
-//            for (int dir = 0; dir < 4; dir++) {
-//                int dir_y = Dy[dir];    // shift instruction on the y-axis
-//                int dir_x = Dx[dir];    // shift instruction on the x-axis
-//
-//                new_y = y + dir_y;      // new y coordinate, using the shift instruction
-//                new_x = x + dir_x;      // new x coordinate, using the shift instruction
-//
-////                Check that the new coordinates are legal.
-////                Essentially making sure that we do not go out of bound, or step into a wall.
-//                if (new_x >= 0 && new_x < mw && new_y >= 0 && new_y < mh && M[new_y][new_x] != 0) {
-////                    Find and assign 'The Road Not Taken' (least used path).
-//                    if (min_x == -1 || M[new_y][new_x] < M[min_y][min_x]) {
-//                        min_x = new_x;
-//                        min_y = new_y;
-//                    }
-//                }
-//            }
-//
-////            Although there is no need to re-assign values, we do so for the sake of readability.
-//            new_x = min_x;
-//            new_y = min_y;
-//
-//            M[new_y][new_x]++;          // indicate that the block has been stepped over
-//            drawblock(y, x);            // redraw previous block, to remove the dot
-//            drawdot(new_y, new_x);      // draw dot in the new block, to track progress
-//
-////            Re-assign coordinates to keep the solver moving
-//            y = new_y;
-//            x = new_x;
-//        }
-//
-//        drawMessage("You made it!");
-//    }
-
     public void solve() {
         steps = new CList<>();      // this list contains every coordinate the solver has 'stepped over'
         int y = 1, x = 1;           // begin at the top left corner
@@ -211,7 +166,64 @@ class studentcode extends mazedfs {
     *   Purpose:    Allow the user to go through the maze, making fun of them in the process.
     */
     public void play() {
+//        Wait five seconds before resetting the maze
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {
 
+        }
+
+        super.autodelay = false;                            // make removal of dots quick
+        super.dotcolor = Color.white;                       // change the color of the dot
+
+//        Redraw over every dot to hide the path
+        for (Coord coord :
+                steps) {
+            drawblock(coord.y, coord.x);
+        }
+
+        drawdot(1, 1);                              // place user at the beginning
+        drawblock(mh - 2, mw - 2);                  // remove last remaining dot
+        drawMessage("Go onwards, young padawan!");      // encourage user to try their hand at this madness
+    }
+
+    //    Every time an arrow key is pressed, call move()
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+        int dir = key == KeyEvent.VK_UP ? 0 : key == KeyEvent.VK_RIGHT ? 1 : key == KeyEvent.VK_DOWN ? 2 : key == KeyEvent.VK_LEFT ? 3 : -1;
+        if (dir != -1)
+            move(dir);
+    }
+
+
+    private void move(int dir) {
+        Coord move = new Coord(y + GDy[dir], x + GDx[dir]);     // create temporary Coord for the desired move
+
+//        If the move is valid and the user has not won yet, let them keep trying
+        if (move.isValid() && !won) {
+//            If they hit the exit, change game state and prevent future moves
+            if (move.y == mh - 2 && move.x == mw - 1) {
+                drawMessage("Great! You made it out alive.");
+                drawblock(y, x);                // remove dot from previous coordinate
+                drawdot(move.y, move.x);        // draw dot on final coordinate
+
+                won = true;                     // change game state
+
+                return;
+            }
+
+            drawblock(y, x);                    // remove dot from previous coordinate
+            drawdot(move.y, move.x);            // draw dot on new coordinate
+
+//            If the move the user made is not part of the optimal path (the only path), make fun of them
+            if (!steps.contains(move))
+                drawMessage("Hah! Are you sure you want to go down this path?");
+            else
+                drawMessage("");
+
+            y = move.y;                         // save position on the y-axis
+            x = move.x;                         // save position on the x-axis
+        }
     }
 }
 

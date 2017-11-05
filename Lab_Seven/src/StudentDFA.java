@@ -56,6 +56,10 @@ public class StudentDFA extends FSM4<String> {
             return 0;
         };
         M[0][C] = () -> {
+            if (ci == inString.length() - 1){
+                printLongest();
+                return 4;
+            }
             cc++;
             return 1;
         };
